@@ -151,9 +151,13 @@ create_or_update_pr() {
 
     existing_pr=$(gh pr list --head "$branch_name" --json number --jq '.[].number')
     modules=$(IFS=,; echo "${relevant_modules[*]}")
-    title="Update ECS templates for modified modules: ${modules}"
-    body="This PR updates the ECS templates for the following modules: ${modules}."
-
+    # Format modules
+    modules_title=$(IFS=", "; echo "${relevant_modules[*]}")
+    modules_body=$(printf -- '- %s\n' "${relevant_modules[@]}")
+    # Create title and body with formatted modules list
+    title="Update ECS templates for modified modules: ${modules_title[*]}"
+    body="This PR updates the ECS templates for the following modules:\n${modules_body}"
+    
     if [ -z "$existing_pr" ]; then
         gh pr create \
             --title "$title" \
