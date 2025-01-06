@@ -8,6 +8,9 @@ fields:
   client:
     fields:
       ip: {}
+  destination:
+    fields:
+      bytes: {}
   agent:
     fields:
       groups: {}
