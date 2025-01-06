@@ -5,6 +5,9 @@ fields:
     fields:
       "@timestamp": {}
       tags: []
+  client:
+    fields:
+      ip: {}
   agent:
     fields:
       groups: {}
