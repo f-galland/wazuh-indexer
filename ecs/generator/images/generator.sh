@@ -102,8 +102,25 @@ generate_mappings() {
     }
   }' "$in_file" > "$out_dir/generated/elasticsearch/legacy/opensearch-template.json"
 
+  # Check if the upload flag has been provided
+  if [ -n "$upload" ]; then
+    upload_mappings "$out_dir" "$url" || exit 1
+  fi
+
   echo "Mappings saved to $out_dir"
 }
+
+upload_mappings() {
+   local out_dir="$1"
+   local url="$2"
+
+   echo "Uploading index template to the OpenSearch cluster"
+   for file in "$out_dir/generated/elasticsearch/composable/component"/*.json; do
+     component_name=$(basename "$file" .json)
+     echo "Uploading $component_name"
+     curl -u admin:admin -X PUT "$url/_component_template/$component_name?pretty" -H 'Content-Type: application/json' -d@"$file" || exit 1
+   done
+ }
 
 # Generate mappings
 generate_mappings "$ECS_MODULE" "$ECS_SOURCE" "$ECS_VERSION" "$UPLOAD" "$URL"
