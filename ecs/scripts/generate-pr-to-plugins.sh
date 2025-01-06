@@ -3,7 +3,7 @@
 # Constants
 MAPPINGS_SUBPATH="mappings/v8.11.0/generated/elasticsearch/legacy/template.json"
 TEMPLATES_PATH="plugins/setup/src/main/resources/"
-PLUGINS_REPO="wazuh/wazuh-indexer-plugins"
+PLUGINS_REPO="f-galland/wazuh-indexer-plugins"
 CURRENT_PATH=$(pwd)
 BASE_BRANCH=${BASE_BRANCH:-master}
 PLUGINS_LOCAL_PATH=${PLUGINS_LOCAL_PATH:-"$CURRENT_PATH"/../wazuh-indexer-plugins}
