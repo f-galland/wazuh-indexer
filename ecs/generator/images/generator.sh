@@ -10,8 +10,6 @@ set -euo pipefail
 # Default values
 ECS_VERSION="${ECS_VERSION:-v8.11.0}"
 ECS_SOURCE="${ECS_SOURCE:-/source}"
-UPLOAD="${UPLOAD:-false}"
-URL="${URL:-https://localhost:9200}"
 
 # Function to display usage information
 show_usage() {
@@ -20,8 +18,6 @@ show_usage() {
   echo "  * ECS_MODULE:   Module to generate mappings for"
   echo "  * ECS_VERSION:  (Optional) ECS version to generate mappings for (default: v8.11.0)"
   echo "  * ECS_SOURCE:   (Optional) Path to the wazuh-indexer repository (default: /source)"
-  echo "  * UPLOAD:       (Optional) Upload generated index template to the Wazuh Indexer cluster (default: false)"
-  echo "  * URL:          (Optional) URL of the Wazuh Indexer cluster (default: https://localhost:9200)"
   echo "Example: docker run -e ECS_MODULE=alerts -e ECS_VERSION=v8.11.0 ecs-generator"
 }
 
@@ -52,8 +48,6 @@ generate_mappings() {
   local ecs_module="$1"
   local indexer_path="$2"
   local ecs_version="$3"
-  local upload="$4"
-  local url="$5"
 
   local in_files_dir="$indexer_path/ecs/$ecs_module/fields"
   local out_dir="$indexer_path/ecs/$ecs_module/mappings/$ecs_version"
@@ -102,25 +96,8 @@ generate_mappings() {
     }
   }' "$in_file" > "$out_dir/generated/elasticsearch/legacy/opensearch-template.json"
 
-  # Check if the upload flag has been provided
-  if [ -n "$upload" ]; then
-    upload_mappings "$out_dir" "$url" || exit 1
-  fi
-
   echo "Mappings saved to $out_dir"
 }
 
-upload_mappings() {
-   local out_dir="$1"
-   local url="$2"
-
-   echo "Uploading index template to the OpenSearch cluster"
-   for file in "$out_dir/generated/elasticsearch/composable/component"/*.json; do
-     component_name=$(basename "$file" .json)
-     echo "Uploading $component_name"
-     curl -u admin:admin -X PUT "$url/_component_template/$component_name?pretty" -H 'Content-Type: application/json' -d@"$file" || exit 1
-   done
- }
-
 # Generate mappings
-generate_mappings "$ECS_MODULE" "$ECS_SOURCE" "$ECS_VERSION" "$UPLOAD" "$URL"
+generate_mappings "$ECS_MODULE" "$ECS_SOURCE" "$ECS_VERSION"

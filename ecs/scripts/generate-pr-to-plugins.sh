@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 # Constants
 MAPPINGS_SUBPATH="mappings/v8.11.0/generated/elasticsearch/legacy/template.json"
 TEMPLATES_PATH="plugins/setup/src/main/resources/"
@@ -93,7 +91,7 @@ clone_target_repo() {
     if [ ! -d "$PLUGINS_LOCAL_PATH" ]; then
         git clone https://github.com/$PLUGINS_REPO.git "$PLUGINS_LOCAL_PATH"
     fi
-    cd "$PLUGINS_LOCAL_PATH"
+    cd "$PLUGINS_LOCAL_PATH" || exit
     git config --global user.email "github-actions@github.com"
     git config --global user.name "GitHub Actions"
     git pull
@@ -145,13 +143,16 @@ commit_and_push_changes() {
 create_or_update_pr() {
     echo
     echo "---> Creating or updating Pull Request..."
-    # gh auth login --with-token
+
     local existing_pr
     local modules
-    local title="Update ECS templates for modified modules: ${modules}"
-    local body="This PR updates the ECS templates for the following modules: ${modules}."
+    local title
+    local body
+
     existing_pr=$(gh pr list --head "$branch_name" --json number --jq '.[].number')
     modules=$(IFS=,; echo "${relevant_modules[*]}")
+    title="Update ECS templates for modified modules: ${modules}"
+    body="This PR updates the ECS templates for the following modules: ${modules}."
 
     if [ -z "$existing_pr" ]; then
         gh pr create \
